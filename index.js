@@ -18,7 +18,7 @@
 //   // https://probot.github.io/docs/development/
 // }
 
-const contains = require('./lib/contains.js')
+const issueMatch = require('./lib/utils.js')
 const defaultConfig = require('./lib/defaultConfig.js')
 
 const issueEvents = ['issues.opened', 'issues.edited', 'issues.reopened']
@@ -26,16 +26,15 @@ const issueEvents = ['issues.opened', 'issues.edited', 'issues.reopened']
 
 module.exports = app => {
   app.on(issueEvents, async context => {
-    const repoConfig = await context.config('template_probot_config.yml')
+    const repoConfig = await context.config('issue_template.yml')
     const config = Object.assign({}, defaultConfig, repoConfig)
-    const { Bug_report, Feature_request } = config.issueConfigs
     const issueBody = context.payload.issue.body
     const params = {
       owner: context.payload.repository.owner.login,
       repo: context.payload.repository.name,
       number: context.payload.issue.number
     }
-    if (!contains(issueBody, Bug_report) && !contains(issueBody, Feature_request)) {
+    if (!issueMatch(issueBody, config.issueConfigs)) {
       const issueComment = context.issue({ body: config.comments.closeIssue })
       context.github.issues.createComment(issueComment)
       return context.github.issues.edit({
