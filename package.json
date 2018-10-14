@@ -42,5 +42,10 @@
       ".env",
       "."
     ]
+  },
+  "probot": {
+    "apps": [
+      "probot-stale"
+    ]
   }
 }
